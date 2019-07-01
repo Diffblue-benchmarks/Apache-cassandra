@@ -1,0 +1,2061 @@
+buildCmd: ant build
+testCmd: true
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+  # Constrain the size of arrays created in the analyzed code.
+  java-max-vla-length: 100000
+phases:
+  -
+    # Phase 0 PRETTY, SIMPLE and SMART - pretty tests, do not test private methods directly, Smart-Harness
+    timeout: 180
+    cbmcArguments:
+      # Use simple models first containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [private]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "1a 2b 3c", "A1B2C3", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c", ",", "/", "'"]
+      # Instantiate classes using the simplest constructor strategy
+      smart-harness: simplest-constructor-and-nondet
+  -
+    # Phase 1 PRETTY AND COMPLEX - standard models only, pretty tests, do not test private methods directly, input factory
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "1a 2b 3c", "A1B2C3", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c", ",", "/", "'"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [private]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+      # Limit input factory recursive depth (default 0 = no recursion allowed)
+      java-test-input-factory-bmc-recursion-limit: 4
+  -
+    # Phase 2 FIFO Strategy - pretty tests, do not test private methods directly, fifo
+    timeout: 100
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Add constraint that strings are printable
+      max-nondet-string-length: 100
+      # Explores the program tree breadth-first.
+      paths: fifo
+      # Set string input value
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "1a 2b 3c", "A1B2C3", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c", ",", "/", "'"]
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: false
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [private]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+    # Phase 3 Exceptions - do not test private methods directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers first (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [private]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+    # Phase 4 Direct testing - test private methods directly, increased reflection
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers first (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "1a 2b 3c", "A1B2C3", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c", ",", "/", "'"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+    # PHASE 5 Mocking - aggressive mocking, do not test private methods directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers first (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Only load the class (and related inner/outer classes) containing the method under test,
+      load-containing-class-only: true
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [private]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+units:
+ - target:
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/TypeSizes.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/TypeSizes.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/vint/VIntCoding.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/vint/VIntCoding.java
+ - target:
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$JmxCounter.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$JmxHistogram.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$AbstractBean.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/DecayingEstimatedHistogramReservoir.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/DecayingEstimatedHistogramReservoir.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$JmxTimer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$JmxMeter.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/ClearableHistogram.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/ClearableHistogram.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$MetricName.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/MBeanWrapper.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/MBeanWrapper.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$JmxGauge.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/EstimatedHistogram.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/EstimatedHistogram.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/ThreadPoolMetrics.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/ThreadPoolMetrics.java
+ - target:
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FastByteOperations.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FastByteOperations.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FastByteOperations$ByteOperations.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FastByteOperations.java
+ - target:
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FBUtilities.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FBUtilities.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/locator/InetAddressAndPort.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/locator/InetAddressAndPort.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FBUtilities$1.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FBUtilities.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/LocalPartitioner$1.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/LocalPartitioner.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/service/StorageService.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/service/StorageService.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FBUtilities$WrappedCloseableIterator.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FBUtilities.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/FSError.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/FSError.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/WindowsTimer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/WindowsTimer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/Range.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/Range.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/Token$TokenFactory.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/Token.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/FSWriteError.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/FSWriteError.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FastByteOperations$ByteOperations.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FastByteOperations.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/CloseableIterator.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/CloseableIterator.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/Descriptor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/Descriptor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/auth/IRoleManager.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/auth/IRoleManager.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/auth/INetworkAuthorizer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/auth/INetworkAuthorizer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/audit/IAuditLogger.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/audit/IAuditLogger.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/DataOutputStreamPlus$2.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/DataOutputStreamPlus.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/BufferedDataOutputStreamPlus.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/BufferedDataOutputStreamPlus.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/NativeLibraryWrapper.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/NativeLibraryWrapper.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/HeapUtils$1.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/HeapUtils.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/CassandraException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/CassandraException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/NativeLibrary.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/NativeLibrary.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/LocalPartitioner.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/LocalPartitioner.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/FileUtils.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/FileUtils.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/ConfigurationException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/ConfigurationException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FastByteOperations.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FastByteOperations.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/JVMStabilityInspector$Killer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/JVMStabilityInspector.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/metadata/IMetadataSerializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/metadata/IMetadataSerializer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/Pair.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/Pair.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/DataOutputBuffer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/DataOutputBuffer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/auth/AllowAllNetworkAuthorizer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/auth/AllowAllNetworkAuthorizer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/IPartitioner.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/IPartitioner.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/auth/IAuthenticator.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/auth/IAuthenticator.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/DataOutputBufferFixed.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/DataOutputBufferFixed.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/metadata/MetadataSerializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/metadata/MetadataSerializer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/JVMStabilityInspector.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/JVMStabilityInspector.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/AbstractIterator.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/AbstractIterator.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/auth/IAuthorizer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/auth/IAuthorizer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/config/DatabaseDescriptor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/config/DatabaseDescriptor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/DataOutputStreamPlus.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/DataOutputStreamPlus.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/RequestValidationException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/RequestValidationException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/Throwables.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/Throwables.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/HeapUtils.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/HeapUtils.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/SerializationHeader$Component.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/SerializationHeader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/IVersionedSerializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/IVersionedSerializer.java
+ - target:
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTree.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTree.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/LeafBTreeSearchIterator.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/LeafBTreeSearchIterator.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTree$Dir.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTree.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/TreeCursor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/TreeCursor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/UpdateFunction.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/UpdateFunction.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/FullBTreeSearchIterator.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/FullBTreeSearchIterator.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/NodeBuilder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/NodeBuilder.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTreeSet.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTreeSet.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/TreeBuilder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/TreeBuilder.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/ObjectSizes.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/ObjectSizes.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/NodeCursor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/NodeCursor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTreeSearchIterator.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTreeSearchIterator.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTree$Builder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTree.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTree$FiltrationTracker.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTree.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTree$Builder$QuickResolver.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTree.java
+ - target:
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/EstimatedHistogram.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/EstimatedHistogram.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/EstimatedHistogram$EstimatedHistogramSerializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/EstimatedHistogram.java
+ - target:
+   - dir: build/classes/main
+     file: org/apache/cassandra/tools/Util.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/tools/Util.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/config/Config.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/config/Config.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/TableMetadata.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/TableMetadata.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FBUtilities.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FBUtilities.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/Indexes$Builder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/Indexes.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/config/YamlConfigurationLoader.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/config/YamlConfigurationLoader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTreeSet$Builder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTreeSet.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/UpdateFunction.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/UpdateFunction.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/SpinningDiskOptimizationStrategy.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/SpinningDiskOptimizationStrategy.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/locator/DynamicEndpointSnitch$2.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/locator/DynamicEndpointSnitch.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/CompactionParams.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/CompactionParams.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/metadata/MetadataSerializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/metadata/MetadataSerializer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/ConfigurationException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/ConfigurationException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/NodeCursor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/NodeCursor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/MBeanWrapper.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/MBeanWrapper.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/LeafBTreeSearchIterator.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/LeafBTreeSearchIterator.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/CompactTables.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/CompactTables.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/FileUtils$SafeFileStore.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/FileUtils.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTree$Builder$QuickResolver.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTree.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/LocalPartitioner.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/LocalPartitioner.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/CassandraException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/CassandraException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/marshal/CompositeType.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/marshal/CompositeType.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/Pair.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/Pair.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/serializers/TypeSerializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/serializers/TypeSerializer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/Columns.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/Columns.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/net/RateBasedBackPressure.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/net/RateBasedBackPressure.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/TableMetadata$Builder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/TableMetadata.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/marshal/UserType.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/marshal/UserType.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/ColumnIdentifier.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/ColumnIdentifier.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/compress/LZ4Compressor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/compress/LZ4Compressor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/metadata/IMetadataSerializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/metadata/IMetadataSerializer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/Triggers$Builder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/Triggers.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/ByteBufferUtil.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/ByteBufferUtil.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/locator/IEndpointSnitch.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/locator/IEndpointSnitch.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/Version.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/Version.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/SsdDiskOptimizationStrategy.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/SsdDiskOptimizationStrategy.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/TableParams.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/TableParams.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/locator/EndpointSnitchInfo.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/locator/EndpointSnitchInfo.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/RequestValidationException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/RequestValidationException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/Descriptor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/Descriptor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/locator/AbstractEndpointSnitch.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/locator/AbstractEndpointSnitch.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/ColumnIdentifier$InternedKey.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/ColumnIdentifier.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/LocalPartitioner$1.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/LocalPartitioner.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/concurrent/DebuggableScheduledThreadPoolExecutor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/concurrent/DebuggableScheduledThreadPoolExecutor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/concurrent/DebuggableScheduledThreadPoolExecutor$UncomplainingRunnable.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/concurrent/DebuggableScheduledThreadPoolExecutor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/locator/DynamicEndpointSnitch.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/locator/DynamicEndpointSnitch.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/ClusteringComparator.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/ClusteringComparator.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/security/EncryptionContext.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/security/EncryptionContext.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/config/DatabaseDescriptor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/config/DatabaseDescriptor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/ColumnSpecification.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/ColumnSpecification.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/tools/Util$1.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/tools/Util.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/RegularAndStaticColumns$Builder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/RegularAndStaticColumns.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/locator/InetAddressAndPort.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/locator/InetAddressAndPort.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/tools/Util$2.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/tools/Util.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTree.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTree.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/Token$TokenFactory.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/Token.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/marshal/AbstractType.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/marshal/AbstractType.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/FileUtils.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/FileUtils.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/security/CipherFactory.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/security/CipherFactory.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/Indexes.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/Indexes.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/config/ConfigurationLoader.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/config/ConfigurationLoader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/locator/DynamicEndpointSnitch$1.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/locator/DynamicEndpointSnitch.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/TableParams$Builder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/TableParams.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/RegularAndStaticColumns.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/RegularAndStaticColumns.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/TableId.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/TableId.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTree$Builder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTree.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/ColumnMetadata.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/ColumnMetadata.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/Triggers.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/Triggers.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/CQL3Type$Custom.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/CQL3Type.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/TreeCursor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/TreeCursor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/FullBTreeSearchIterator.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/FullBTreeSearchIterator.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/TableMetadata$Flag.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/TableMetadata.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/SerializationHeader$Component.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/SerializationHeader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/config/ParameterizedClass.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/config/ParameterizedClass.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/ObjectSizes.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/ObjectSizes.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/ColumnMetadata$Kind.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/ColumnMetadata.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTreeSet.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTreeSet.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/auth/DataResource.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/auth/DataResource.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/marshal/CollectionType.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/marshal/CollectionType.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/UUIDGen.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/UUIDGen.java
+ - target:
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/obs/BitUtil.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/obs/BitUtil.java
+ - target:
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/metadata/StatsMetadata.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/metadata/StatsMetadata.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cache/ChunkCache.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cache/ChunkCache.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/SimpleChunkReader.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/SimpleChunkReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/UntypedResultSet$FromResultSet.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/UntypedResultSet.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/RowIndexEntry$Serializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/RowIndexEntry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/QueryProcessor$InternalStateInstance.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/QueryProcessor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$IndexesBounds.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/marshal/MapType.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/marshal/MapType.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$1.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/BloomCalculations.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/BloomCalculations.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FBUtilities.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FBUtilities.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/EstimatedHistogram.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/EstimatedHistogram.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$UniqueIdentifier.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FastByteOperations$ByteOperations.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FastByteOperations.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA61.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/RingPosition.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/RingPosition.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/Pair.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/Pair.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/SystemKeyspace.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/SystemKeyspace.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableFormat.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableFormat.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$InstanceTidier.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/virtual/VirtualKeyspace.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/virtual/VirtualKeyspace.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$Operator.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$2.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/streamhist/StreamingTombstoneHistogramBuilder$DataHolder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/streamhist/StreamingTombstoneHistogramBuilder.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/RegularAndStaticColumns$Builder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/RegularAndStaticColumns.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cache/InstrumentingCache.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cache/InstrumentingCache.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/MD5Digest.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/MD5Digest.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FastByteOperations$UnsafeOperations.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FastByteOperations.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/Views.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/Views.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/SerializationHeader.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/SerializationHeader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/virtual/VirtualKeyspaceRegistry.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/virtual/VirtualKeyspaceRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/CQLStatement$Raw.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/CQLStatement.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$GlobalTidy.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/Ref$IdentityCollection.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/Ref.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cache/ICache.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cache/ICache.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/RestorableMeter$RestorableEWMA.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/RestorableMeter.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/Version.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/Version.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA11.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableFormat$Type.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableFormat.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/virtual/VirtualTable.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/virtual/VirtualTable.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/ColumnMetadata$Kind.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/ColumnMetadata.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA197.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA175.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FilterFactory.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FilterFactory.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/KeyspaceMetadata.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/KeyspaceMetadata.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/RestorableMeter.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/RestorableMeter.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/Columns.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/Columns.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/ColumnMetadata.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/ColumnMetadata.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$AndThen.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/BufferDecoratedKey.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/BufferDecoratedKey.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/DataRange.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/DataRange.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/QueryOptions.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/QueryOptions.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableWriter.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableWriter.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/Throwables.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/Throwables.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cache/KeyCacheKey.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cache/KeyCacheKey.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/QueryProcessor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/QueryProcessor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/CQLStatement.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/CQLStatement.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/RowIndexEntry.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/RowIndexEntry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/ChannelProxy.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/ChannelProxy.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/MemoryOutputStream.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/MemoryOutputStream.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/RandomAccessReader.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/RandomAccessReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/CompressedChunkReader$Mmap.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/CompressedChunkReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/CQLFragmentParser$CQLParserFunction.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/CQLFragmentParser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/service/QueryState.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/service/QueryState.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTreeSet$Builder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTreeSet.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/UpdateFunction.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/UpdateFunction.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$GlobalTidy$1.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/BloomCalculations$BloomSpecification.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/BloomCalculations.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA199.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/CqlLexer.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/CqlLexer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/RandomAccessReader$RandomAccessReaderWithOwnChannel.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/RandomAccessReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/SharedCloseableImpl.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/SharedCloseableImpl.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTree$Builder$QuickResolver.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTree.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/Ref$State.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/Ref.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$PartitionPositionBounds.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FastByteOperations.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FastByteOperations.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/DefaultValue.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/DefaultValue.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/SafeMemoryWriter.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/SafeMemoryWriter.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/MmapRebufferer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/MmapRebufferer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/ResultSet.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/ResultSet.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTreeSet.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTreeSet.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/Rebufferer$BufferHolder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/Rebufferer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Lexer$DFA29.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Lexer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA205.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/ByteBufferUtil.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/ByteBufferUtil.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/FileDataInput.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/FileDataInput.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA31.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/CqlParser.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/CqlParser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/AlwaysPresentFilter.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/AlwaysPresentFilter.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/Token$KeyBound.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/Token.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/FileHandle$Builder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/FileHandle.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Lexer.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Lexer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/obs/IBitSet.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/obs/IBitSet.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/obs/OffHeapBitSet.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/obs/OffHeapBitSet.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/CqlLexer$DFA1.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/CqlLexer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/service/ClientState.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/service/ClientState.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Lexer$DFA38.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Lexer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/QueryOptions$DefaultQueryOptions.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/QueryOptions.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/RebufferingInputStream.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/RebufferingInputStream.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA213.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/ErrorCollector.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/ErrorCollector.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/QueryOptions$SpecificOptions.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/QueryOptions.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cache/CacheKey.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cache/CacheKey.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/MmappedRegions.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/MmappedRegions.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/MmappedRegions$Tidier.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/MmappedRegions.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/ResultSet$ResultMetadata.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/ResultSet.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA2.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/streamhist/TombstoneHistogram.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/streamhist/TombstoneHistogram.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/RefCounted$Tidy.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/RefCounted.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTree.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTree.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA1.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/compress/ICompressor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/compress/ICompressor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/CQL3Type$Custom.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/CQL3Type.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/Ref.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/Ref.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/SelfRefCounted.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/SelfRefCounted.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/SchemaConstants.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/SchemaConstants.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA22.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/UntypedResultSet$Row.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/UntypedResultSet.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/Schema.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/Schema.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/progress/ProgressListener.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/progress/ProgressListener.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/ColumnSpecification.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/ColumnSpecification.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/Bounds.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/Bounds.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/Rebufferer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/Rebufferer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/Slices.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/Slices.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/QualifiedName.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/QualifiedName.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/FileHandle$Cleanup.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/FileHandle.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/CassandraException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/CassandraException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA202.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/Keyspaces.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/Keyspaces.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/Component$Type.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/Component.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/ColumnIdentifier.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/ColumnIdentifier.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/ISSTableScanner.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/ISSTableScanner.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/TypeSizes.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/TypeSizes.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA218.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/UntypedResultSet.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/UntypedResultSet.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/IFilter.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/IFilter.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/CompressedChunkReader.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/CompressedChunkReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/IndexSummary.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/IndexSummary.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/IncompatibleSchemaException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/IncompatibleSchemaException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/InvalidRequestException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/InvalidRequestException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/WrappedSharedCloseable$Tidy.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/WrappedSharedCloseable.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/RebuffererFactory.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/RebuffererFactory.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/Downsampling.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/Downsampling.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/Ref$Debug.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/Ref.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/ConfigurationException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/ConfigurationException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$3.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA195.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/IndexSummaryBuilder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/IndexSummaryBuilder.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/concurrent/NamedThreadFactory.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/concurrent/NamedThreadFactory.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/FileUtils.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/FileUtils.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/Component.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/Component.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/CorruptSSTableException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/CorruptSSTableException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/RowIndexEntry$IndexSerializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/RowIndexEntry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA30.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$DropPageCache.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/DataInputPlus.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/DataInputPlus.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/PartitionPosition.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/PartitionPosition.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/statements/SelectStatement.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/statements/SelectStatement.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/TableMetadata.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/TableMetadata.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/BloomFilterTracker.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/BloomFilterTracker.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/CompressionParams.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/CompressionParams.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/Range.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/Range.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/FileHandle.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/FileHandle.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/Descriptor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/Descriptor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/SyntaxException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/SyntaxException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/TableMetadataRef.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/TableMetadataRef.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/memory/MemoryUtil.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/memory/MemoryUtil.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA217.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/IndexSummary$IndexSummarySerializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/IndexSummary.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/Keyspace.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/Keyspace.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/metadata/IMetadataSerializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/metadata/IMetadataSerializer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$Factory.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/selection/Selection.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/selection/Selection.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/metadata/ValidationMetadata.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/metadata/ValidationMetadata.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/concurrent/DebuggableThreadPoolExecutor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/concurrent/DebuggableThreadPoolExecutor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/metadata/MetadataSerializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/metadata/MetadataSerializer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/BloomFilterSerializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/BloomFilterSerializer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReadsListener.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReadsListener.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/SerializationHeader$Component.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/SerializationHeader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/Token.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/Token.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/ObjectSizes.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/ObjectSizes.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/rows/UnfilteredRowIterator.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/rows/UnfilteredRowIterator.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/WrappedSharedCloseable.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/WrappedSharedCloseable.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/BloomFilter.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/BloomFilter.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/IPartitioner.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/IPartitioner.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/vint/VIntCoding.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/vint/VIntCoding.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA193.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cache/ChunkCache$CachingRebufferer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cache/ChunkCache.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/ColumnIdentifier$InternedKey.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/ColumnIdentifier.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Lexer$DFA9.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Lexer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/SafeMemory$MemoryTidy.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/SafeMemory.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/tracing/Tracing.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/tracing/Tracing.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/Memory.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/Memory.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/filter/ColumnFilter.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/filter/ColumnFilter.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/AbstractBounds.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/AbstractBounds.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/Tables.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/Tables.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/MmappedRegions$State.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/MmappedRegions.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Lexer$DFA45.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Lexer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/AbstractReaderFileProxy.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/AbstractReaderFileProxy.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/rows/EncodingStats.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/rows/EncodingStats.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/DataOutputPlus.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/DataOutputPlus.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/DataOutputBuffer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/DataOutputBuffer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/serializers/TypeSerializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/serializers/TypeSerializer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/DecoratedKey.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/DecoratedKey.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/QueryHandler$Prepared.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/QueryHandler.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/ChannelProxy$Cleanup.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/ChannelProxy.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/dht/Range$1.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/dht/Range.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/SafeMemory.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/SafeMemory.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA228.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/CQLFragmentParser.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/CQLFragmentParser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/format/SSTableReader$OpenReason.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/format/SSTableReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/FSReadError.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/FSReadError.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/LimitingRebufferer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/LimitingRebufferer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/marshal/UserType.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/marshal/UserType.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/compress/CompressionMetadata$Chunk.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/compress/CompressionMetadata.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/DataOutputStreamPlus.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/DataOutputStreamPlus.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/SSTable.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/SSTable.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/CachingParams.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/CachingParams.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA174.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/FSWriteError.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/FSWriteError.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/lifecycle/Tracker.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/lifecycle/Tracker.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/FSError.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/FSError.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Parser$DFA17.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Parser.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/ChunkReader.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/ChunkReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Lexer$DFA23.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Lexer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/lifecycle/View.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/lifecycle/View.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/ColumnFamilyStore.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/ColumnFamilyStore.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/marshal/AbstractType.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/marshal/AbstractType.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/UnknownColumnException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/UnknownColumnException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/compress/CompressionMetadata.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/compress/CompressionMetadata.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/DiskOptimizationStrategy.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/DiskOptimizationStrategy.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/RegularAndStaticColumns.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/RegularAndStaticColumns.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/config/DatabaseDescriptor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/config/DatabaseDescriptor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/CompressedChunkReader$Standard.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/CompressedChunkReader.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/tracing/TraceState.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/tracing/TraceState.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Lexer$DFA25.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Lexer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/Cql_Lexer$DFA31.class
+     sourceDir: src/gen-java
+     sourceFile: org/apache/cassandra/cql3/Cql_Lexer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/memory/AbstractAllocator.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/memory/AbstractAllocator.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/BufferedDataOutputStreamPlus.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/BufferedDataOutputStreamPlus.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/cql3/statements/QualifiedStatement.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/cql3/statements/QualifiedStatement.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/sstable/IndexSummaryBuilder$ReadableBoundary.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/sstable/IndexSummaryBuilder.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/Ref$GlobalState.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/Ref.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/RequestValidationException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/RequestValidationException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/DataOutputStreamPlus$2.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/DataOutputStreamPlus.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/progress/ProgressEvent.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/progress/ProgressEvent.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/btree/BTree$Builder.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/btree/BTree.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/db/marshal/CollectionType.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/db/marshal/CollectionType.java
+ - target:
+   - dir: build/classes/main
+     file: org/apache/cassandra/net/Crc.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/net/Crc.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/net/Crc$1.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/net/Crc.java
+ - target:
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/memory/BufferPool.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/memory/BufferPool.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$JmxCounter.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/Ref$State.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/Ref.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/RefCounted$Tidy.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/RefCounted.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/FBUtilities.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/FBUtilities.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/MetricNameFactory.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/MetricNameFactory.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/memory/BufferPool$GlobalPool.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/memory/BufferPool.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/memory/BufferPool$Chunk.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/memory/BufferPool.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$JmxTimer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/Ref.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/Ref.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$JmxHistogram.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/concurrent/InfiniteLoopExecutor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/concurrent/InfiniteLoopExecutor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/memory/BufferPool$MicroQueueOfChunks.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/memory/BufferPool.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/memory/BufferPool$Debug.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/memory/BufferPool.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$AbstractBean.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/BufferPoolMetrics.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/BufferPoolMetrics.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/memory/BufferPool$LocalPoolRef.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/memory/BufferPool.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/memory/MemoryUtil.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/memory/MemoryUtil.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/ExecutorUtils.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/ExecutorUtils.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/config/DatabaseDescriptor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/config/DatabaseDescriptor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/NoSpamLogger.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/NoSpamLogger.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/Ref$GlobalState.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/Ref.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$JmxMeter.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/compress/BufferType.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/compress/BufferType.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/Throwables.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/Throwables.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$MetricName.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/memory/BufferPool$1.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/memory/BufferPool.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/BufferPoolMetrics$1.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/BufferPoolMetrics.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/memory/BufferPool$1L.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/memory/BufferPool.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/MBeanWrapper.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/MBeanWrapper.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/metrics/CassandraMetricsRegistry$JmxGauge.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/metrics/CassandraMetricsRegistry.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/memory/BufferPool$Recycler.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/memory/BufferPool.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/concurrent/Ref$Debug.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/concurrent/Ref.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/util/FileUtils.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/util/FileUtils.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/memory/BufferPool$LocalPool.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/memory/BufferPool.java
+ - target:
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/CompressionParams.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/CompressionParams.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/schema/CompressionParams$Serializer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/schema/CompressionParams.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/compress/ICompressor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/compress/ICompressor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/compress/LZ4Compressor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/compress/LZ4Compressor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/ConfigurationException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/ConfigurationException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/config/ParameterizedClass.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/config/ParameterizedClass.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/CassandraException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/CassandraException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/exceptions/RequestValidationException.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/exceptions/RequestValidationException.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/Pair.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/Pair.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/io/compress/ZstdCompressor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/io/compress/ZstdCompressor.java
+ - target:
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/Hex.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/Hex.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/service/StorageService.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/service/StorageService.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/config/DatabaseDescriptor.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/config/DatabaseDescriptor.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/HeapUtils$1.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/HeapUtils.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/JVMStabilityInspector$Killer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/JVMStabilityInspector.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/NativeLibraryWrapper.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/NativeLibraryWrapper.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/WindowsTimer.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/WindowsTimer.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/HeapUtils.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/HeapUtils.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/NativeLibrary.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/NativeLibrary.java
+   - dir: build/classes/main
+     file: org/apache/cassandra/utils/JVMStabilityInspector.class
+     sourceDir: src/java
+     sourceFile: org/apache/cassandra/utils/JVMStabilityInspector.java
